@@ -1,5 +1,5 @@
-RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_percent_only = 100,
-                     main = "", ylab = "Relative abundance [%]", xlab = "Ranks", plot_legend = T, axes = T, na.action = "exclude"){
+RankCurve = function(df, summarize = F, groups = NULL, col = NULL, lwd = 1, lty = 1, top_percent_only = 100,
+                     main = "", ylab = "Relative abundance [%]", xlab = "Number of species", plot_legend = F, axes = T, na.action = "keep"){
   
   ### Checking and loading packages ###
   if(is.element("RColorBrewer", installed.packages()[,1]) == T){
@@ -7,8 +7,7 @@ RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_
   }else{
     stop("RColorBrewer package not installed")
   }
-  
-  if(is.element("dplyr", installed.packages()[,1]) == T){
+    if(is.element("dplyr", installed.packages()[,1]) == T){
     library(dplyr)
   }else{
     stop("dplyr package not installed")
@@ -22,8 +21,9 @@ RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_
                          "#AC92EC", "#967ADC"))
   }else{col = as.character(col)}
   
-  if(!is.null(summarize_by)){
-    df = as.data.frame(SummarizeDataset(df = df, by = summarize_by))
+  if(summarize == T){
+    if(is.null(groups) | length(groups) != nrow(df)){stop("No valid grouping data provided!")}
+    df = as.data.frame(SummarizeDataset(df = df, by = groups))
     if(na.action == "exclude"){
       df = Normalize100(df[which(!is.na(df[,1])),-1])
     }
@@ -31,15 +31,21 @@ RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_
       df = Normalize100(df[,-1])
     }
   }
-  if(is.null(summarize_by)){
+  
+  if(summarize == F && !is.null(groups) && length(groups) == nrow(df)){
     if(na.action == "exclude"){
-      df = Normalize100(df[which(!is.na(df[,1])),])
+      if(is.null(groups) | length(groups) != nrow(df)){stop("No valid grouping data provided!")}
+      df = Normalize100(df[which(!is.na(groups)),])
     }
     if(na.action == "keep"){
       df = Normalize100(df[,])
     }
     }
 
+  if(summarize == F && is.null(groups)){
+    df = Normalize100(df)
+  }
+  
   #####################################
   
   for (j in 1:ncol(df)){
@@ -54,7 +60,7 @@ RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_
   }
   
   for (l in 1:length(vec.list)){
-    vec.sorted = vec.list[[l]]
+    vec.sorted = as.data.frame(vec.list[[l]])
     names(vec.sorted) = c("Abundance")
     vec.sorted$Rank = 1:nrow(vec.sorted) 
     vec.sorted$CumSum = 100 - cumsum(vec.sorted$Abundance)
