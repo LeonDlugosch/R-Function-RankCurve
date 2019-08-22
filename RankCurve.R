@@ -24,14 +24,22 @@ RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_
   
   if(!is.null(summarize_by)){
     df = as.data.frame(SummarizeDataset(df = df, by = summarize_by))
+    if(na.action == "exclude"){
+      df = Normalize100(df[which(!is.na(df[,1])),-1])
+    }
+    if(na.action == "keep"){
+      df = Normalize100(df[,-1])
+    }
   }
-  
-  if(na.action = "exclude"){
-    df = Summarize100(df[which(!is.na(df[,1])),-1])
-  }
-  if(na.action = "keep"){
-    df = Summarize100(df[,-1])
-  }
+  if(is.null(summarize_by)){
+    if(na.action == "exclude"){
+      df = Normalize100(df[which(!is.na(df[,1])),])
+    }
+    if(na.action == "keep"){
+      df = Normalize100(df[,])
+    }
+    }
+
   #####################################
   
   for (j in 1:ncol(df)){
@@ -52,15 +60,17 @@ RankCurve = function(df, summarize_by = NULL, col = NULL, lwd = 1, lty = 1, top_
     vec.sorted$CumSum = 100 - cumsum(vec.sorted$Abundance)
     
     if (plot_legend == T && l == 1){
+      col = colorRampPalette(col)(length(max.length))
       layout(matrix(c(2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,1), nrow=4, ncol = 4, byrow = T))
       plot(0,0, type = "n", axes = F, main = "", xlab = "", ylab = "")
       legend("center", legend = names(df), col = col, lty = lty, lwd = lwd, xpd = NA, bty = "n")
     }
-    if (plot_legend == F && l == 1){par(mfrow = c(1,1))}
-    
+    if (plot_legend == F && l == 1){
+      col = colorRampPalette(col)(length(max.length))
+      par(mfrow = c(1,1))
+      }
     
     if (l == 1){
-      col = colorRampPalette(col)(length(max.length))
       plot(x = c(0,vec.sorted$Rank), y = c(100,vec.sorted$CumSum),
            type = "l", main = main, xlab = xlab, ylab = ylab,
            xlim = c(0, (max(max.length)*(top_percent_only/100))), las = 1, axes = axes,
