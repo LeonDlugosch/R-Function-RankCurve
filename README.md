@@ -25,6 +25,7 @@ Using default settings rank abundance curves are generated for every sample usin
 ```
 RankCurve(df[,1:10])
 ```
+![](images/1.png)
 
 Data from unknown species can be excluded (e.g. unclassified sequencing data) by setting the "na.action" option to "exclude".
 Of course, you need to specifies which group each row in the data belongs to.
@@ -32,19 +33,20 @@ In this case 3 rows are excluded from further analysis.
 ```
 RankCurve(df[,1:10], na. exclude = "exclude", groups = df$Group)
 ```
+![](images/2.png)
 
 The "groups" variable can also be used to summarize the whole dataset.
 This is especially when you want to analyse the abundance profiles of your samples on different taxonomic levels.
 ```
 RankCurve(df[,1:10], na. exclude = "exclude", groups = df$Group, summarize = T)
 ```
+![](images/3.png)
 
 By setting plot_legend = T, you can plot a legend for the samples used for the rank abundance curves. 
 ```
 RankCurve(df[,1:10], na. exclude = "exclude", groups = df$Group, summarize = T, plot_legend = T)
 ```
-
-
+![](images/4.png)
 
 
 ### Full List of options
